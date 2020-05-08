@@ -41,8 +41,8 @@
                 'event__r--down': event.r < 1,
             }"
             class="event__r">R {{sign}} 1</div>
-            <div>
-                {{event.r}}
+            <div class="event__growth">
+                Groeicijfer per dag: {{event.r}}
             </div>
     </div>
 </template>
@@ -108,11 +108,10 @@
                     background: green;
                 }
             }
+        }
 
-
-
-
-
+        .event__growth {
+            font-size: 11px;
         }
     }
 </style>

@@ -30,38 +30,50 @@
                 cover: null,
                 xScale: null,
                 yScale: null,
-                tooltip: null,
-                eventInfo: null,
-                visorX: null,
-                visorY: null,
+
+                lines: {},
+
                 max: 0,
                 currentDay: 0,
                 timer: null
             }
         },
         methods: {
-            play(start, end, time, callback) {
+            play(tactic, period, start, end, time, callback) {
                 let interval = time / (end - start);
                 this.stop();
                 this.currentDay = start;
                 this.timer = setInterval(()=> {
-                    this.tick();
-                    if (this.currentDay >= end) {
+                    if (this.currentDay >= end || this.currentDay >= tactic.days.length) {
                         this.stop();
                         setTimeout(() => {
                             callback();
                         }, 1000)
+                    } else {
+                        this.tick(tactic, period);
                     }
                 }, interval)
             },
-            tick() {
-                let x, width, l;
-                l = this.tactics[0].days.length;
+            tick(tactic, period) {
                 this.currentDay++;
-                x = this.xScale(this.currentDay);
-                width = Math.max(0, this.xScale(l) - x);
-                this.coverG.attr('transform', 'translate(' + x + ',-100)');
-                this.cover.attr('width', width);
+                this.drawwLinePart(tactic, this.currentDay);
+
+            },
+            drawwLinePart(tactic, end) {
+                let line, d, daysChopped;
+                line = this.lines['tactic-' + tactic.id];
+                daysChopped = [];
+                for (let i = 0; i < end; i++) {
+                    daysChopped.push(tactic.days[i]);
+                }
+
+                d = d3.line()
+                    .x((d, i) => { return this.xScale(i); })
+                    .y((d) => { return this.yScale(d.cases); })
+                    .curve(d3.curveMonotoneX);
+
+                line.datum(daysChopped)
+                    .attr("d", d);
 
             },
             stop() {
@@ -183,12 +195,10 @@
                 }
             },
             drawTactic(tactic) {
-
                 let g = this.tacticLayer.append('g')
                     .attr('class', 'g-tactic--' + tactic.id);
                 this.tacticLayers.push(g);
                 this.drawTacticLine(tactic);
-                this.drawTacticDots(tactic);
                 this.drawEvents(tactic);
             },
             drawEvents(tactic) {
@@ -204,8 +214,9 @@
                 y = this.yScale(tactic.days[index].cases);
 
                 eventGroup = layer.append('g')
-                    .attr('class', 'event-group tactic--' + tactic.id)
-                    .attr('transform', 'translate(' + x + ',' + y + ')');
+                    .attr('class', 'event-group event__tactic--' + tactic.id + ' event__period--' + period.id)
+                    .attr('transform', 'translate(' + x + ',' + y + ')')
+                    .attr('visibility', 'hidden');
 
                 circle = eventGroup.append('circle')
                     .attr('class', 'event')
@@ -221,53 +232,26 @@
                     .attr('fill', tactic.color);
             },
             drawTacticLine(tactic) {
-                let line, layer;
+                let line, d, layer;
                 layer = this.tacticLayers[tactic.id - 1];
 
-                line = d3.line()
+                d = d3.line()
                     .x((d, i) => { return this.xScale(i); })
                     .y((d) => { return this.yScale(d.cases); })
                     .curve(d3.curveMonotoneX);
 
-                layer.append("path")
+                line = layer.append("path")
                     .datum(tactic.days)
                     .attr("class", "tactic-line tactic--" + tactic.id)
                     .attr("stroke", () => {
                         return tactic.color;
                     })
                     .style('fill', 'transparent')
-                    .attr("d", line)
+                    .attr("d", d)
                     .attr('stroke-width', '1.5');
+
+                this.lines['tactic-' + tactic.id] = line;
             },
-            drawTacticDots(tactic) {
-                let dots, layer;
-                layer = this.tacticLayers[tactic.id - 1];
-
-                dots = layer.selectAll(".dot.dot--" + tactic.id)
-                    .data(tactic.days)
-                    .enter().append("g")
-                    .attr("class", "dot dot--" + tactic.id);
-
-                dots.append("circle")
-                    .attr("fill", "transparent")
-                    .attr("cx", (d, i) => { return this.xScale(i) })
-                    .attr("cy", (d) => { return this.yScale(d.cases) })
-                    .attr("r", 7)
-                    .attr("class", "dot__active-area tactic--" + tactic.id);
-
-                dots.append("circle")
-                    .attr("fill", () => {
-                        return tactic.color;
-                    })
-                    .attr("cx", (d, i) => { return this.xScale(i) })
-                    .attr("cy", (d) => { return this.yScale(d.cases) })
-                    .attr("r", 2)
-                    .attr("class", "dot__visibile-area tactic--" + tactic.id)
-                    .style('stroke', '#fff');
-            },
-
-
-
             drawAxes() {
                 this.container = this.svg
                     .attr("width", this.settings.width + this.settings.margin.left + this.settings.margin.right)
@@ -281,7 +265,6 @@
                     .call(d3.axisBottom(this.xScale)
                         .ticks(6)
                         .tickFormat(d3.format(".0s"))
-
                     );
 
                 this.container.append("g")
@@ -313,13 +296,29 @@
                 d3.selectAll('.tactic--' + tactic.id)
                     .attr('visibility', 'hidden');
 
+                d3.selectAll('.event__tactic--' + tactic.id)
+                    .attr('visibility', 'hidden');
+
             }
         },
         mounted() {
             this.init();
             this.update();
 
+            eventBus.$on('reset', () => {
+                this.stop();
+                for (let tactic of this.tactics) {
+                    this.drawwLinePart(tactic, 0);
+                    this.hideTactic(tactic);
+                }
+            });
+
             eventBus.$on('show-tactic', (tactic) => {
+                this.showTactic(tactic);
+            });
+
+            eventBus.$on('show-and-rewind-tactic', (tactic) => {
+                this.drawwLinePart(tactic, 0);
                 this.showTactic(tactic);
             });
 
@@ -333,7 +332,9 @@
                 start = dateTools.getOffsetByDateString(period.start);
                 end = dateTools.getOffsetByDateString(period.end);
                 time = period.comment.time;
-                this.play(start, end, time, payload.callback);
+                d3.selectAll('.event__period--' + period.id)
+                    .attr('visibility', 'visible');
+                this.play(payload.tactic, period, start, end, time, payload.callback);
             });
 
             eventBus.$on('play-tactic', (payload) => {
@@ -350,22 +351,6 @@
             currentPeriod() {
                 return this.$store.state.settings.currentPeriod;
             }
-        },
-        watch: {
-            // currentTactic:  {
-            //     handler: function(newValue) {
-            //         //this.rewind();
-            //     }
-            // },
-            // currentPeriod:  {
-            //     handler: function(newValue) {
-            //         let start, end, time;
-            //         start = dateTools.getOffsetByDateString(this.currentPeriod.start);
-            //         end = dateTools.getOffsetByDateString(this.currentPeriod.end);
-            //         time = this.currentPeriod.comment.time;
-            //         this.play(start, end, time);
-            //     }
-            // }
         }
     }
 </script>
@@ -442,7 +427,7 @@
                 .cover {
 
                     rect {
-                        fill: #fff;
+                        fill: transparent;
                     }
                 }
 

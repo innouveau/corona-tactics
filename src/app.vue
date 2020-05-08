@@ -6,10 +6,12 @@
 
     import dataTactics from '@/data/tactics';
     import events from '@/data/events';
+    import tools from "./components/tools";
 
     export default {
         name: 'app',
         components: {
+            tools,
             lineChart,
             comment,
             tactics
@@ -35,6 +37,7 @@
                     return tactic;
                 });
                 this.$store.commit('tactics/init', tactics);
+                this.$store.commit('settings/updateProperty', {key: 'loaded', value: true});
             },
             startAnimation() {
                 animation.start(this.$store.state.tactics.all);
@@ -43,7 +46,7 @@
         mounted() {
             this.initData();
             setTimeout(() =>{
-                this.startAnimation();
+                //this.startAnimation();
             }, 10);
         }
     }
@@ -58,6 +61,7 @@
         <div class="right">
             <comment/>
             <line-chart/>
+            <tools/>
         </div>
     </div>
 </template>

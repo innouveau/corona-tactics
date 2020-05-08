@@ -1,6 +1,7 @@
 import _base from './_base-module';
 
 const state = {
+    loaded: false,
     currentTactic: null,
     currentPeriod: null,
     currentFrame: null,

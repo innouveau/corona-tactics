@@ -27,7 +27,7 @@ const events = [
         id: 5,
         title: 'Versoepeling pakket 2',
         description: 'Horeca, Middelbare scholen',
-        r: 1.03,
+        r: 1.02,
         icon: ''
     },
 ];

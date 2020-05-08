@@ -33,10 +33,19 @@ const getOffsetByDateString = function(dateString) {
     return Math.round(diff / msPerDay);
 };
 
+const dateToString = function(date) {
+    let day, month, year;
+    month = date.getMonth() + 1;
+    day = date.getDate();
+    year = date.getFullYear();
+    return year + '-' + month + '-' + day;
+};
+
 export default {
     formatFromString,
     formatFromStringFromMs,
     offsetFromMs,
     getMonthName,
-    getOffsetByDateString
+    getOffsetByDateString,
+    dateToString
 }
