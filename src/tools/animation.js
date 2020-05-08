@@ -71,7 +71,9 @@ const nextTactic = function() {
 };
 
 const stop = function() {
-    console.log('klaar');
+    store.commit('settings/updateProperty', {key: 'currentTactic', value: null} );
+    store.commit('settings/updateProperty', {key: 'currentPeriod', value: null} );
+    store.commit('ui/updateProperty', {key: 'comment', value: 'Speel de animatie opnieuw of wijzig de variabelen.'} )
 };
 
 const startTactic = function(tactic) {

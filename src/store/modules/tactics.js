@@ -22,15 +22,17 @@ const mutations = {
     updatePropertyOfItem(state, payload) {
         _base.mutations.updatePropertyOfItem(state, payload.item, payload.property, payload.value);
     },
-    updateDateLockdown(state, payload) {
+    updateDatePackage1(state, payload) {
+        console.log(payload);
+
         state.all = state.all.map((item) => {
             if (item.id === 3) {
                 item.periods = item.periods.map((period) => {
                     if (period.id === 7) {
-                        period.end = payload.date1;
+                        period.end = payload.date2;
                     }
                     if (period.id === 8) {
-                        period.start = payload.date2;
+                        period.start = payload.date1;
                     }
                     return period;
                 })
@@ -38,8 +40,24 @@ const mutations = {
             return item;
         });
 
+    },
+    updateDatePackage2(state, payload) {
+        state.all = state.all.map((item) => {
+            if (item.id === 3) {
+                item.periods = item.periods.map((period) => {
+                    if (period.id === 8) {
+                        period.end = payload.date2;
+                    }
+                    if (period.id === 9) {
+                        period.start = payload.date1;
+                    }
+                    return period;
+                })
+            }
+            return item;
+        });
     }
-}
+};
 
 export default {
     namespaced: true,

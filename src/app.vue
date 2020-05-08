@@ -7,10 +7,12 @@
     import dataTactics from '@/data/tactics';
     import events from '@/data/events';
     import tools from "./components/tools";
+    import Disclaimer from "./components/disclaimer";
 
     export default {
         name: 'app',
         components: {
+            Disclaimer,
             tools,
             lineChart,
             comment,
@@ -21,6 +23,9 @@
         computed: {
             dataLoaded() {
                 return this.$store.state.dataLoaded;
+            },
+            showDisclaimer() {
+                return this.$store.state.ui.disclaimer;
             }
         },
         methods: {
@@ -41,12 +46,15 @@
             },
             startAnimation() {
                 animation.start(this.$store.state.tactics.all);
+            },
+            show() {
+                this.$store.commit('ui/updateProperty', {key: 'disclaimer', value: true});
             }
         },
         mounted() {
             this.initData();
             setTimeout(() =>{
-                //this.startAnimation();
+                this.startAnimation();
             }, 10);
         }
     }
@@ -63,6 +71,13 @@
             <line-chart/>
             <tools/>
         </div>
+        <div
+            @click="show()"
+            class="show-disclaimer">
+            Disclaimer
+        </div>
+        <disclaimer
+            v-if="showDisclaimer"/>
     </div>
 </template>
 
@@ -85,6 +100,27 @@
 
         .right {
             width: calc(100% - 300px);
+        }
+
+        .show-disclaimer {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .button {
+            border: 1px solid #888;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            margin-right: 10px;
+
+            &:hover {
+                background: orange;
+            }
         }
     }
 </style>

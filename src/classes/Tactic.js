@@ -43,7 +43,7 @@ class Tactic {
     }
 
     getRandom() {
-        let range = 0.2;
+        let range = 0.1;
         return 1 + ((Math.random() * range) - (0.5 * range));
     }
 

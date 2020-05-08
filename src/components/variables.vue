@@ -1,6 +1,7 @@
 <script>
     import Datepicker from 'vuejs-datepicker';
     import dateTools from '@/tools/date';
+    import { eventBus } from '@/event-bus';
 
     export default {
         name: 'variables',
@@ -8,6 +9,14 @@
             Datepicker
         },
         props: {},
+        data() {
+            return {
+                disabledDatesLockdown: {
+                    to: new Date('2020-03-24'),
+                    from: new Date('2020-06-29'),
+                }
+            }
+        },
         computed: {
             package1() {
                 return this.$store.getters['events/getItemById'](3);
@@ -18,19 +27,34 @@
             lockdown() {
                 return this.$store.getters['events/getItemById'](2);
             },
-            crushTheCurveLockdown() {
-                return this.$store.getters['tactics/getItemById'](3).periods[1];
+            crushTheCurvePackage1() {
+                return this.$store.getters['tactics/getItemById'](3).periods[2];
             },
-            endLockdown: {
+            crushTheCurvePackage2() {
+                return this.$store.getters['tactics/getItemById'](3).periods[3];
+            },
+            startPackage1: {
                 set(value) {
                     let date1, date2;
                     date1 = dateTools.dateToString(value);
-                    date2 = dateTools.dateToString( new Date(dateTools.offsetFromMs(value, 1)));
+                    date2 = dateTools.dateToString( new Date(dateTools.offsetFromMs(value.getTime(), -1)));
 
-                    this.$store.commit('tactics/updateDateLockdown', {date1, date2})
+                    this.$store.commit('tactics/updateDatePackage1', {date1, date2})
                 },
                 get() {
-                    return this.crushTheCurveLockdown.end;
+                    return this.crushTheCurvePackage1.start;
+                }
+            },
+            startPackage2: {
+                set(value) {
+                    let date1, date2;
+                    date1 = dateTools.dateToString(value);
+                    date2 = dateTools.dateToString( new Date(dateTools.offsetFromMs(value.getTime(), -1)));
+
+                    this.$store.commit('tactics/updateDatePackage2', {date1, date2})
+                },
+                get() {
+                    return this.crushTheCurvePackage2.start;
                 }
             },
             ratePackage1: {
@@ -56,9 +80,17 @@
                 get() {
                     return this.lockdown.r;
                 }
-            },
+            }
         },
-        methods: {}
+        methods: {
+            apply() {
+                for (let tactic of this.$store.state.tactics.all) {
+                    tactic.fillCases();
+                }
+                eventBus.$emit('redraw');
+                this.$parent.isEditing = false;
+            }
+        }
     }
 </script>
 
@@ -75,10 +107,19 @@
         </div>
         <div class="variables__row">
             <div class="variables__label">
-                Datum einde lockdown in Crush the Curve
+                Datum start Versoepeling pakket 1 in 'Crush the Curve'<br>
+                (oftewel: einde Lockdown)
             </div>
             <datepicker
-                    v-model="endLockdown"/>
+                    v-model="startPackage1"
+                    :disabled-dates="disabledDatesLockdown"/>
+        </div>
+        <div class="variables__row">
+            <div class="variables__label">
+                Datum start Versoepeling pakket 2 in 'Crush the Curve'
+            </div>
+            <datepicker
+                    v-model="startPackage2"/>
         </div>
         <div class="variables__row">
             <div class="variables__label">
@@ -99,6 +140,13 @@
         <div class="variables__row variables__row--footer">
             * Groeicijfer is een equivalent van R, maar niet identiek
         </div>
+        <div class="footer">
+            <div
+                @click="apply()"
+                class="button">
+                Voer uit en teken opnieuw
+            </div>
+        </div>
     </div>
 </template>
 
@@ -108,7 +156,7 @@
 
     .variables {
         border: 1px solid #ddd;
-        padding: 10px;
+        padding: 32px;
         background: #fff;
         position: fixed;
         left: 50%;
@@ -124,7 +172,7 @@
             padding: 8px 0;
 
             .variables__label {
-                width: 150px;
+                width: 2150px;
             }
 
             input {
@@ -134,6 +182,19 @@
 
             &.variables__row--footer {
                 margin-top: 40px;
+            }
+        }
+
+        .footer {
+            display: flex;
+            margin-top: 20px;
+
+            .button {
+                background: orange;
+
+                &:hover {
+                    color: #fff;
+                }
             }
         }
 

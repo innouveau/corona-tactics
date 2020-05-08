@@ -25,9 +25,6 @@
                 monthsLayer: null,
                 tacticLayer: null,
                 tacticLayers: [],
-                coverLayer: null,
-                coverG: null,
-                cover: null,
                 xScale: null,
                 yScale: null,
 
@@ -47,14 +44,16 @@
                     if (this.currentDay >= end || this.currentDay >= tactic.days.length) {
                         this.stop();
                         setTimeout(() => {
-                            callback();
+                            if (callback) {
+                                callback();
+                            }
                         }, 1000)
                     } else {
-                        this.tick(tactic, period);
+                        this.tick(tactic);
                     }
                 }, interval)
             },
-            tick(tactic, period) {
+            tick(tactic) {
                 this.currentDay++;
                 this.drawwLinePart(tactic, this.currentDay);
 
@@ -127,17 +126,10 @@
                 this.drawAxes();
                 this.drawMonths();
                 this.drawTactics();
-                this.drawCover();
-            },
-            drawCover() {
-                this.coverG = this.coverLayer.append('g')
-                    .attr('transform', 'translate(0,-100)');
-
-                this.cover = this.coverG.append('rect')
-                    .attr('width', 0)
-                    .attr('height', this.settings.height + 200)
             },
             drawTactics() {
+                this.tacticLayers = [];
+                this.lines = {};
                 for (let tactic of this.tactics) {
                     this.drawTactic(tactic);
                 }
@@ -277,9 +269,6 @@
                 this.tacticLayer = this.container.append('g')
                     .attr('class', 'tactics');
 
-                this.coverLayer = this.container.append('g')
-                    .attr('class', 'cover');
-
             },
             init() {
                 let div = this.$refs.chart;
@@ -312,6 +301,43 @@
                     this.hideTactic(tactic);
                 }
             });
+
+
+
+            eventBus.$on('redraw', () => {
+                this.stop();
+                this.update();
+
+                setTimeout(() => {
+                    for (let tactic of this.tactics) {
+                        this.drawwLinePart(tactic, 0);
+                        //this.hideTactic(tactic);
+                    }
+                    let i = 0;
+
+                    const drawTactic = (tactic) => {
+                        let time, t;
+                        time = 2000;
+                        // a little faster for the short line of the first tactic
+                        if (tactic.id === 1) {
+                            t = time / 2;
+                        } else {
+                            t = time;
+                        }
+                        this.play(tactic, null, 0, 180, t);
+                        i++;
+                        if (i < this.tactics.length) {
+                            setTimeout(() => {
+                                drawTactic(this.tactics[i])
+                            }, (0.8 * t))
+                        }
+                    };
+
+                    drawTactic(this.tactics[i])
+                }, );
+            });
+
+
 
             eventBus.$on('show-tactic', (tactic) => {
                 this.showTactic(tactic);
@@ -423,14 +449,6 @@
                         }
                     }
                 }
-
-                .cover {
-
-                    rect {
-                        fill: transparent;
-                    }
-                }
-
             }
         }
     }

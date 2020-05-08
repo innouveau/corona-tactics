@@ -56,18 +56,5 @@
     .tools {
         display: flex;
         align-items: center;
-
-        .button {
-            border: 1px solid #888;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 700;
-            margin-right: 10px;
-
-            &:hover {
-                background: orange;
-            }
-        }
     }
 </style>

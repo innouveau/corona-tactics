@@ -28,7 +28,7 @@ const tactics = [
                 end: "2020-03-22",
                 comment: {
                     title: 'Dan de Maximale Controle tactiek.<Br>Het virus gaat vrij rond tot half maart (echte cijfers).',
-                    time: 5000
+                    time: 3000
                 }
             }, {
                 id: 3,
@@ -45,8 +45,8 @@ const tactics = [
                 start: "2020-05-11",
                 end: "2020-05-31",
                 comment: {
-                    title: 'Het kabinet besluit de scholen te openen per begin half mei.<br>Dit zorgt voor een kleine groei.',
-                    time: 4000
+                    title: 'Het kabinet besluit de scholen te openen per half mei.<br>Dit zorgt voor een kleine groei (prognose obv instelbaar groeicijfer)',
+                    time: 6000
                 }
             }, {
                 id: 5,
@@ -80,7 +80,7 @@ const tactics = [
                 start: "2020-03-23",
                 end: "2020-05-31",
                 comment: {
-                    title: 'Weer de Intelligente lockdown.<br>Alleen: we houden deze nog een paar weken langer aan! >De lijn blijft zakken.',
+                    title: 'Weer de Intelligente lockdown.<br>Alleen: we houden deze nog een paar weken langer aan! De lijn blijft zakken.',
                     time: 5000
                 }
             }, {
@@ -115,7 +115,7 @@ const tactics = [
                 start: "2020-02-27",
                 end: "2020-03-22",
                 comment: {
-                    title: 'Ten slotte nog de Uitroei-tactiek. Weer gaat het virus vrij rond tot half maart.',
+                    title: 'Tenslotte nog de Uitroei-tactiek. Weer gaat het virus vrij rond tot half maart.',
                     time: 4000
                 }
             }, {
@@ -125,7 +125,7 @@ const tactics = [
                 end: "2020-08-31",
                 comment: {
                     title: 'Daarna wordt hij keihard de kop ingedrukt.<br>Dit is helaas alleen slechts mogelijk met anti-democratische en anti-vrijheids middelen. Ook deze tactiek nemen we dus niet serieus.',
-                    time: 4000
+                    time: 7000
                 }
             }
         ]
